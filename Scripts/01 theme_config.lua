@@ -1,12 +1,12 @@
 local defaultConfig = {
     global = {
-        TipType = 1, -- 1 = tips, 2 = quotes, 3 = grade counter, 4 = nothing ...
+        TipType = 3, -- 1 = tips, 2 = quotes, 3 = grade counter, 4 = nothing ...
         ShowVisualizer = true,
         FallbackToAverageColorBG = true, -- wheel bg only
         StaticBackgrounds = false,
         ShowBanners = true, -- globally disable banners from displaying if false
         VideoBanners = true,
-        WheelPosition = true, -- true = left, false = right
+        WheelPosition = false, -- true = left, false = right
         WheelBanners = true, -- true = on, false = off
         WheelSpeed = 15,
         MeasureLines = false,

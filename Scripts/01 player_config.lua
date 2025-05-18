@@ -157,10 +157,10 @@ local defaultGameplaySizes = {
 }
 
 local defaultConfig = {
-    BPMDisplay = true,
+    BPMDisplay = false,
     DisplayPercent = true,
     ErrorBar = 0, -- 0=off, 1=regular, anythingelse=ewma
-    FullProgressBar = true,
+    FullProgressBar = false,
     JudgeCounter = true,
     LaneCover = 0, -- 0=off, 1=sudden, 2=hidden
     DisplayMean = true,
@@ -168,11 +168,11 @@ local defaultConfig = {
     DisplayStdDev = false,
     Leaderboard = 0, -- 0=off, 1=online, 2=local (current rate)
     MeasureCounter = false,
-    MiniProgressBar = true,
-    NPSDisplay = true,
-    NPSGraph = true,
-    PlayerInfo = true,
-    RateDisplay = true,
+    MiniProgressBar = false,
+    NPSDisplay = false,
+    NPSGraph = false,
+    PlayerInfo = false,
+    RateDisplay = false,
     TargetTracker = true,
 
     JudgmentText = true,

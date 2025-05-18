@@ -1,8 +1,8 @@
 THEMEINFO = {
-    Name = "Rebirth",
-    Version = "12",
-    Date = "20250111",
-    Author = "Celebelian, poco0317, and the Etterna Team"
+    Name = "Clover",
+    Version = "1",
+    Date = "20250518",
+    Author = "Celebelian, poco0317, LuckInferno, and the Etterna Team"
 }
 
 function getThemeName()
