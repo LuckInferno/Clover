@@ -175,36 +175,36 @@ local t = Def.ActorFrame {
 }
 
 local ratios = {
-    LeftGap = 78 / 1920,
-    UpperGap = 135 / 1080, -- from top edge of screen to edge of bg
-    Width = 1765 / 1920,
-    Height = 863 / 1080,
-    LipLeftGap = 800 / 1920, -- the lip starts at the end of the banner
-    LipHeight = 50 / 1080,
-    LipLength = 965 / 1920, -- runs to the right end of the frame
+    LeftGap = 94 / 1920,
+    UpperGap = 127 / 1080, -- from top edge of screen to edge of bg
+    Width = 1732 / 1920,
+    Height = 885 / 1080,
+    LipLeftGap = 775 / 1920, -- the lip starts at the end of the banner
+    LipHeight = 68 / 1080,
+    LipLength = 957 / 1920, -- runs to the right end of the frame
 
     GraphLeftGap = 18 / 1920,
     GraphWidth = 739 / 1920, -- this must be the same as in metrics [GraphDisplay/ComboGraph]
-    GraphBannerGap = 9 / 1080, -- from bottom of banner to top of graph
+    GraphBannerGap = 6 / 1080, -- from bottom of banner to top of graph
     BannerLeftGap = 18 / 1920,
-    BannerUpperGap = 7 / 1080,
-    BannerHeight = 228 / 1080,
+    BannerUpperGap = 18 / 1080,
+    BannerHeight = 231 / 1080,
     BannerWidth = 739 / 1920,
-    LifeGraphHeight = 71 / 1080, -- this must be the same as in metrics [GraphDisplay]
+    LifeGraphHeight = 80 / 1080, -- this must be the same as in metrics [GraphDisplay]
     ComboGraphHeight = 16 / 1080, -- this must be the same as in metrics [ComboGraph]
 
     DividerThickness = 2 / 1080,
     LeftDividerLeftGap = 18 / 1920,
     LeftDividerLength = 739 / 1920,
 
-    LeftDivider1UpperGap = 338 / 1080,
-    LeftDivider2UpperGap = 399 / 1080,
+    LeftDivider1UpperGap = 358 / 1080,
+    LeftDivider2UpperGap = 419 / 1080,
 
-    ModTextLeftGap = 19 / 1920,
+    ModTextLeftGap = 18 / 1920,
     -- modtext Y pos is half between the 2 dividers.
 
     JudgmentBarLeftGap = 18 / 1920, -- edge of frame to left of bar
-    JudgmentBarUpperGap = 408 / 1080, -- top edge of from to top edge of top bar
+    JudgmentBarUpperGap = 428 / 1080, -- top edge of from to top edge of top bar
     JudgmentBarHeight = 44 / 1080,
     JudgmentBarAllottedSpace = 264 / 1080, -- top of top bar to top of bottom bar (valign 0)
     JudgmentBarLength = 739 / 1920,
@@ -212,7 +212,7 @@ local ratios = {
     JudgmentNameLeftGap = 25 / 1920, -- from left edge of bar to left edge of text
     JudgmentCountRightGap = 95 / 1920, -- from right edge of bar to left edge of percentage, right edge of count
 
-    BottomTextUpperGap = 733 / 1080, -- top edge of frame to top edge of the text at the bottom left of the screen
+    BottomTextUpperGap = 744 / 1080, -- top edge of frame to top edge of the text at the bottom left of the screen
     BottomTextHeight = 16 / 1080, -- fudge
     BottomTextSpacing = 10 / 1080, -- mix with the immediately above value
     SubTypeTextLeftGap = 18 / 1920, -- edge of frame to left of text
@@ -224,15 +224,15 @@ local ratios = {
     StatCountTotalRightGap = 0 / 1920, -- this is a base line, probably 0, here for consistency
     StatTextAllottedSpace = 105 / 1080, -- top of top text to top of bottom text (valign 0)
 
-    RightHalfLeftGap = 803 / 1920, -- left edge of frame to left edge of everything on the right side
+    RightHalfLeftGap = 775 / 1920, -- left edge of frame to left edge of everything on the right side
     RightHalfRightAlignLeftGap = 936 / 1920, -- basically the same length as the divider, right end of rightest right text
     RightHorizontalDividerLength = 936 / 1920,
-    RightHorizontalDivider1UpperGap = 244 / 1080, -- top of frame to top of divider
+    RightHorizontalDivider1UpperGap = 254 / 1080, -- top of frame to top of divider
     RightHorizontalDivider2UpperGap = 544 / 1080, -- same
 
-    SongTitleLowerGap = 147 / 1080, -- top of divider to bottom of text
-    SongArtistLowerGap = 103 / 1080, -- same
-    SongPackLowerGap = 59 / 1080, -- ...
+    SongTitleLowerGap = 146 / 1080, -- top of divider to bottom of text
+    SongArtistLowerGap = 104 / 1080, -- same
+    SongPackLowerGap = 62 / 1080, -- ...
     SongRateLowerGap = 15 / 1080,
     GradeLowerGap = 141 / 1080,
     WifePercentLowerGap = 77 / 1080,
@@ -240,9 +240,11 @@ local ratios = {
 
     ScoreBoardHeight = 298 / 1080, -- inner edge of divider to inner edge of divider
 
-    OffsetPlotUpperGap = 559 / 1080, -- from top of frame to top of plot
-    OffsetPlotHeight = 295 / 1080,
+    OffsetPlotUpperGap = 564 / 1080, -- from top of frame to top of plot
+    OffsetPlotHeight = 304 / 1080,
     OffsetPlotWidth = 936 / 1920,
+    -- CDTitleAllowedHeight = 140 / 1080, -- approximated allowed height, from top edge to bottom edge
+    CDTitleAllowedHeight = 80 / 1080, -- approximated allowed height, from top edge to bottom edge
 }
 
 local actuals = {
@@ -302,6 +304,7 @@ local actuals = {
     OffsetPlotUpperGap = ratios.OffsetPlotUpperGap * SCREEN_HEIGHT,
     OffsetPlotHeight = ratios.OffsetPlotHeight * SCREEN_HEIGHT,
     OffsetPlotWidth = ratios.OffsetPlotWidth * SCREEN_WIDTH,
+    CDTitleAllowedHeight = ratios.CDTitleAllowedHeight * SCREEN_HEIGHT,
 }
 
 local translations = {
@@ -1056,7 +1059,8 @@ t[#t+1] = Def.ActorFrame {
         InitCommand = function(self)
             self:valign(0):halign(0)
             self:zoomto(actuals.Width, actuals.Height)
-            self:diffusealpha(0.75)
+            -- self:diffuse(color("#FFFFFF"))
+            self:diffusealpha(0.60)
             registerActorToColorConfigElement(self, "main", "PrimaryBackground")
         end
     },
@@ -1476,7 +1480,89 @@ t[#t+1] = Def.ActorFrame {
                 end
             end
         end
+    },
+    UIElements.SpriteButton(1, 1, nil) .. {
+        Name = "CDTitle",
+        InitCommand = function(self)
+            -- lets... avoid aligning this.
+            -- we want to try to avoid moving the cdtitle a lot
+            -- so find the center position of the measure coordinates
+            local rightEdge = actuals.GraphLeftGap + actuals.GraphWidth
+            local leftEdge = rightEdge - actuals.CDTitleAllowedHeight
+            local topEdge = actuals.BannerUpperGap + actuals.BannerHeight + actuals.GraphBannerGap
+            local bottomEdge = topEdge + actuals.CDTitleAllowedHeight
+            local cX = rightEdge
+            local cY = topEdge
+            self:xy(cX, cY)
+        end,
+        SetCommand = function(self, params)
+            self:finishtweening()
+            self.song = params.song
+            if params.song then
+                self:diffusealpha(1)
+    
+                -- load the cdtitle if it is present
+                if params.song:HasCDTitle() then
+                    self:Load(params.song:GetCDTitlePath())
+                else
+                    -- otherwise, load the invisible (blank) image and stretch it so you can still hover it
+                    self:Load(THEME:GetPathG("", "_blank"))
+    
+                    -- local allowedWidth = actuals.CDTitleAllowedHeight
+                    -- self:zoomto(allowedWidth, actuals.CDTitleAllowedHeight)
+                    self:zoomtoheight(actuals.LifeGraphHeight)
+                    return
+                end
+                  
+                local h = self:GetHeight()
+                local w = self:GetWidth()
+                local allowedWidth = actuals.CDTitleAllowedHeight * 100
+                if h >= actuals.CDTitleAllowedHeight and w >= allowedWidth then
+                    if h * (allowedWidth / actuals.CDTitleAllowedHeight) >= w then
+                        self:zoom(actuals.CDTitleAllowedHeight / h)
+                    else
+                        self:zoom(allowedWidth / w)
+                    end
+                elseif h >= actuals.CDTitleAllowedHeight then
+                    self:zoom(actuals.CDTitleAllowedHeight / h)
+                elseif w >= allowedWidth then
+                    self:zoom(allowedWidth / w)
+                else
+                    self:zoom(1)
+                end
+
+            else
+                self:diffusealpha(0)
+            end
+            self:halign(1)
+            self:valign(0)
+            if isOver(self) then
+                self:playcommand("ToolTip")
+            end
+        end,
+        ToolTipCommand = function(self)
+            if isOver(self) then
+                if self.song and not self:IsInvisible() then
+                    local auth = self.song:GetOrTryAtLeastToGetSimfileAuthor()
+                    if auth and #auth > 0 then
+                        TOOLTIP:SetText(auth)
+                        TOOLTIP:Show()
+                    end
+                else
+                    TOOLTIP:Hide()
+                end
+            end
+        end,
+        MouseOverCommand = function(self)
+            if self:IsInvisible() then return end
+            self:playcommand("ToolTip")
+        end,
+        MouseOutCommand = function(self)
+            if self:IsInvisible() then return end
+            TOOLTIP:Hide()
+        end,
     }
 }
+
 
 return t
