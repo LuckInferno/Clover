@@ -1,0 +1,585 @@
+-- Config
+local p1name = GAMESTATE:GetPlayerDisplayName(PLAYER_1)
+
+local posx = SCREEN_WIDTH - 5
+local posy = 35
+
+local center1P = PREFSMAN:GetPreference("Center1Player");    -- For relocating graph/judgecount frame
+local cols = GAMESTATE:GetCurrentStyle():ColumnsPerPlayer(); -- For relocating graph/judgecount frame
+
+local target = playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).TargetGoal / 100
+
+local colorbaseline = color("#FFFFFF")
+local colormidline = color("#6666ff")
+local colortopline = color("#fffe65")
+
+local colorbest = getPaceMakerColor('Best')
+local colortarget = getPaceMakerColor('Target')
+local colorcurrent = getPaceMakerColor('Current')
+
+local playedgrade = {
+	playedC = false,
+	playedB = false,
+	playedA = false,
+	playedAA = false,
+	playedAAA = false,
+	playedMAX = false
+}
+
+local gradetier = {
+	Tier00 = 100 / 100, -- MAX
+	Tier01 = 99.97 / 100, -- AAAA
+	Tier02 = 99.75 / 100, -- AAA
+	Tier03 = 93 / 100, -- AA
+	Tier04 = 80 / 100, -- A
+	Tier05 = 70 / 100, -- B
+	Tier06 = 60 / 100, -- C
+	Tier07 = 0 / 100,  -- D
+};
+
+local cols = GAMESTATE:GetCurrentStyle():ColumnsPerPlayer()
+local evencols = cols - cols%2
+local isCentered = ((cols >= 6) or PREFSMAN:GetPreference("Center1Player")) and GAMESTATE:GetNumPlayersEnabled() == 1
+local nfspace = MovableValues.NotefieldSpacing and MovableValues.NotefieldSpacing or 0
+local width = 64 * cols * MovableValues.NotefieldWidth + nfspace * (evencols)
+local padding = 8
+local styleType = ToEnumShortString(GAMESTATE:GetCurrentStyle():GetStyleType())
+
+local P1X =
+	SCREEN_CENTER_X + MovableValues.NotefieldX + (cols % 2 == 0 and -nfspace / 2 or 0)
+
+-- if not isCentered then
+-- 	P1X = THEME:GetMetric("ScreenGameplay", string.format("PlayerP1%sX", styleType)) + MovableValues.NotefieldX + (cols % 2 == 0 and -nfspace / 2 or 0)
+-- end
+
+local ratio = (((SCREEN_WIDTH/2) - 141) / 338)
+
+-- Space to the right of the playfield
+local availiblespace = (SCREEN_WIDTH) - (P1X + ((width+padding) * getNoteFieldScale(PLAYER_1)) / 2)
+
+local graphmode = "WIFE"
+local avgscoretype = tonumber(GetUserPref("AvgScoreTypeP1")); -- unused. will allow users to select scoretype for average score. currently hardcoded to percent score.
+local avgscoremode = "DP"
+
+local graphwidth = (317 * ratio) - 20
+local graphheight = 253 - 20
+
+-- local graphheight = 256 - 40     -- scoregraph height (aka: height from 0% to max)
+-- local graphwidth = 256 - 40      -- width of scoregraph, minimum of 100 recommended to avoid overlapping text.
+
+local graphx = SCREEN_WIDTH - (availiblespace / 2) + (graphwidth / 2)
+-- local graphy = (SCREEN_HEIGHT/2) + (graphheight/2)
+local graphy = 26 + (253/2) + (graphheight/2)
+
+-- local graphx = SCREEN_WIDTH - 40 -- Location of graph, graph is aligned to right.
+-- local graphy = 220 + 128         -- Location of scoregraph bottom (aka: 0% line)
+
+
+local pacemakerbarx = graphx - 8 - (32 / 2)
+local pacemakerbarwidth = 32
+
+local bestcorebarx = graphx - 16 - (32) - (32 / 2)
+local bestcorebarwidth = 32
+
+local currentbarx = graphx - 24 - (32) - (32) - (32 / 2)
+local currentbarwidth = 32
+
+local keyTextPosX = (currentbarx - (currentbarwidth / 2) + (graphx - graphwidth)) / 2  - 4
+local keyBoxWidth = ((currentbarx - (currentbarwidth / 2)) - (graphx - graphwidth)) * 0.80
+local keyBoxTextMaxWidth = keyBoxWidth * 1.8
+
+local widthName = ((currentbarx - (currentbarwidth / 2)) - (graphx - graphwidth)) * 1.4
+local widthNum = ((currentbarx - (currentbarwidth / 2)) - (graphx - graphwidth)) * 0.8
+
+
+OR, XOR, AND = 1, 3, 4
+function bitwise(a, b, oper)
+   local r, m, s = 0, 2^31
+   repeat
+	  s,a,b = a+b+m, a%m, b%m
+	  r,m = r + m*oper%(s-a-b), m/2
+   until m < 1
+   return r
+end
+
+
+-- Others
+
+function AddPacemakerDisplay(self, second)
+	local isEnable = playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).GraphBestScore
+
+	if second then
+		if isEnable then
+			graphwidth = graphwidth + 20
+		end
+
+		self:halign(1):x(graphx):y(0):zoomto(graphwidth, SCREEN_HEIGHT):diffuse(color("0.2,0.2,0.2,0.4")):vertalign(top)
+	else
+		if isEnable then
+			graphwidth = graphwidth + 20
+		end
+
+		self:halign(1):x(graphx):y(0):zoomto(graphwidth, SCREEN_HEIGHT):diffuse(color("0,0,0,0.6")):vertalign(top)
+			:fadeleft(1)
+	end
+end
+
+P1Fail = false
+
+-- Functions
+
+function WifeToPercentPacemaker(params)
+	return (-(params.WifeDifferential - params.CurWifeScore)) * (params.TotalPercent / (100 * params.CurWifeScore)) * 100
+end
+
+function WifeToPercentUser(params)
+	return string.format("%5.2f", params.TotalPercent)
+end
+
+function getLight(self)
+	return self:GetHeight() * self:GetTrueZoomY() / graphheight
+end
+
+function GetBestScore()
+	local score = getBestScore(PLAYER_1, nil, getCurRate(), nil)
+	return score
+end
+
+
+local t = Def.ActorFrame {
+	Def.ActorFrame { -- Score Graph
+		InitCommand = function(self)
+			self:visible(true)
+		end,
+		BeginCommand = function(self)
+			if graphmode == 'Off' or cols >= 8 then
+				self:visible(true)
+			end;
+		end,
+		Def.Quad { --Graph BG
+			Name = "graphbg",
+			InitCommand = function(self)
+				AddPacemakerDisplay(self)
+				self:diffusealpha(0)
+			end,
+		},
+		Def.Quad { --Graph BG
+			Name = "graphbg",
+			InitCommand = function(self)
+				AddPacemakerDisplay(self, true)
+				self:diffusealpha(0)
+			end,
+		},
+		Def.Quad { -- AAA Grade Line
+			Name = "AAALine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy - graphheight):zoomto(graphwidth, 2):diffuse(colortopline):vertalign(
+					bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:visible(true);
+				end;
+			end,
+			JudgmentMessageCommand = function(self, params)
+				if params.TotalPercent / 100 >= 99.75 / 100 then
+					self:diffuse(colortopline);
+				else
+					self:diffuse(colortopline);
+				end;
+			end,
+		},
+		LoadFont("Common Normal") .. { --AAA Text
+			Name = "AAALineText",
+			InitCommand = function(self)
+				self:halign(0):x(graphx - (graphwidth) + 2):y(graphy - graphheight - 3):zoom(0.3):diffuse(colortopline):shadowlength(0.5)
+					:vertalign(bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:settext('AAA');
+					self:visible(true);
+				end;
+			end,
+			JudgmentMessageCommand = function(self)
+			end,
+		},
+		Def.Quad { -- AA Grade Line
+			Name = "AALine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy - graphheight * gradetier["Tier03"]):zoomto(graphwidth, 1):diffuse(
+					colormidline):vertalign(bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:visible(true);
+				end;
+			end,
+		},
+		Def.Quad { -- A Grade Line
+			Name = "ALine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy - graphheight * gradetier["Tier04"]):zoomto(graphwidth, 1):diffuse(
+					colormidline):vertalign(bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:visible(true);
+				end;
+			end,
+		},
+		Def.Quad { -- B Grade Line
+			Name = "BLine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy - graphheight * gradetier["Tier05"]):zoomto(graphwidth, 1):diffuse(
+					colormidline):vertalign(bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:visible(true);
+				end;
+			end,
+		},
+		Def.Quad { -- C Grade Line
+			Name = "CLine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy - graphheight * gradetier["Tier06"]):zoomto(graphwidth, 1):diffuse(
+					colormidline):vertalign(bottom):visible(true)
+			end,
+			BeginCommand = function(self)
+				if graphmode == "WIFE" then
+					self:visible(true);
+				end;
+			end,
+		},
+		Def.Quad { -- Base Line
+			Name = "BaseLine",
+			InitCommand = function(self)
+				self:halign(1):x(graphx):y(graphy + 1):zoomto(graphwidth, 1):diffuse(colorbaseline):vertalign(bottom)
+					:visible(true)
+			end,
+		},
+		LoadFont("Common Normal") .. { --Pacemaker Curscore
+			Name = "Pacemaker Curscore",
+			InitCommand = function(self)
+				self:x(currentbarx - (currentbarwidth / 2) - 4):y(graphy - 17):zoom(0.35):horizalign(right):shadowlength(1):shadowcolor(color("#000000FF"))
+				self:maxwidth(widthNum)
+			end,
+			BeginCommand = function(self)
+				self:settext(0);
+			end,
+			JudgmentMessageCommand = function(self, params)
+				self:settext(string.format("%5.2f", params.TotalPercent))
+				self:visible(true)
+			end,
+		},
+		LoadFont("Common Normal") .. { --Pacemaker username
+			Name = "Pacemaker username",
+			InitCommand = function(self)
+				self:x(graphx - graphwidth):y(graphy - 17):zoom(0.4):horizalign(left):maxwidth((graphwidth - 30) / 0.4):shadowlength(1):shadowcolor(color("#000000FF"))
+				self:maxwidth(widthName)
+			end,
+			BeginCommand = function(self)
+				self:queuecommand("Set")
+			end,
+			SetCommand = function(self)
+				self:settext(p1name);
+			end,
+		},
+		LoadFont("Common Normal") .. { --Pacemaker TargetScore
+			Name = "Pacemaker_TargetScore",
+			InitCommand = function(self)
+				self:x(currentbarx - (currentbarwidth / 2) - 4):y(graphy - 7):zoom(0.35):horizalign(right):shadowlength(1):shadowcolor(color("#000000FF"))
+				self:maxwidth(widthNum)
+			end,
+			BeginCommand = function(self)
+				self:settext(0);
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = (-(params.WifeDifferential - params.CurWifeScore)) *
+					(params.TotalPercent / (100 * params.CurWifeScore))
+				self:settext(string.format("%5.2f", score * 100))
+				self:visible(true)
+			end,
+		},
+		LoadFont("Common Normal") .. { --Pacemaker Label
+			Name = "Pacemaker_TargetScore",
+			InitCommand = function(self)
+				self:x(graphx - graphwidth):y(graphy - 7):zoom(0.4):horizalign(left):shadowlength(1):shadowcolor(color("#000000FF"))
+				self:maxwidth(widthName)
+			end,
+			BeginCommand = function(self)
+				self:queuecommand("Set")
+			end,
+			SetCommand = function(self)
+				self:settext('Pacemaker');
+			end,
+		},
+
+		Def.Quad { --CurrentTargetBarGhost
+			Name = "CurrentGhostTargetBar",
+			InitCommand = function(self)
+				self:x(pacemakerbarx):y(graphy):zoomx(pacemakerbarwidth):diffuse(color("#000000")):vertalign(bottom)
+					:visible(true):diffusealpha(0.5)
+				self:MaskSource()
+			end,
+			BeginCommand = function(self)
+				self:zoomtoheight((target * (graphheight - 1)) + 1)
+				self:visible(true)
+			end
+		},
+		Def.Quad { --CurrentTargetBarGhost
+			Name = "CurrentGhostTargetBar",
+			InitCommand = function(self)
+				self:x(pacemakerbarx):y(graphy):zoomx(pacemakerbarwidth + 2):diffuse(color("#FFFFFF")):vertalign(bottom)
+					:visible(true)
+				self:MaskDest()
+			end,
+			BeginCommand = function(self)
+				self:zoomtoheight((target * (graphheight - 1)) + 1)
+				self:visible(true)
+			end
+		},
+		Def.Quad { --CurrentTargetBarGhost
+			Name = "CurrentGhostTargetBar",
+			InitCommand = function(self)
+				self:x(pacemakerbarx):y(graphy):zoomx(pacemakerbarwidth):diffuse(color("#000000")):vertalign(bottom)
+					:visible(true):diffusealpha(0.5)
+			end,
+			BeginCommand = function(self)
+				self:zoomtoheight((target * (graphheight - 1)) + 1)
+				self:visible(true)
+			end
+		},
+		Def.Quad { --CurrentTargetBar
+			Name = "CurrentTargetBar",
+			InitCommand = function(self)
+				self:x(pacemakerbarx):y(graphy):zoomx(pacemakerbarwidth):diffuse(colortarget):vertalign(bottom)
+					:visible(true)
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = (-(params.WifeDifferential - params.CurWifeScore)) *
+					(params.TotalPercent / (100 * params.CurWifeScore))
+				self:zoomtoheight((score * (graphheight - 1)) + 1);
+				local light = getLight(self)
+				self:diffusetopedge({ 1, light, light, 1 })
+				self:visible(true);
+			end,
+		},
+		Def.Quad { --CurrentScoreBar
+			Name = "CurrentScoreBar",
+			InitCommand = function(self)
+				self:x(currentbarx):y(graphy):zoomx(currentbarwidth + 2):diffuse(color("#FFFFFF")):vertalign(bottom)
+					:visible(true)
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = (params.TotalPercent / 100 * (graphheight - 1)) + 1
+				if score >= 1 then
+					self:zoomtoheight(score);
+					self:visible(true);
+				end
+			end,
+		},
+		Def.Quad { --CurrentScoreBar
+			Name = "CurrentScoreBar",
+			InitCommand = function(self)
+				self:x(currentbarx):y(graphy):zoomx(currentbarwidth):diffuse(colorcurrent):vertalign(bottom):visible(true)
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = (params.TotalPercent / 100 * (graphheight - 1)) + 1
+				if score >= 1 then
+					self:zoomtoheight(score);
+					local light = getLight(self)
+					self:diffusetopedge(light, light, 1, 1)
+					self:visible(true);
+				end
+			end,
+		},
+		Def.Quad { -- best score graph
+			Name = "BestScoreBar",
+			InitCommand = function(self)
+				self:x(bestcorebarx):y(graphy):zoomx(bestcorebarwidth + 2):diffuse(color("#FFFFFF")):vertalign(bottom)
+					:visible(true)
+			end,
+			BeginCommand = function(self)
+				local score = GetBestScore()
+
+				if score then
+					local truescore = (score:GetWifeScore())
+					self:zoomtoheight((truescore * (graphheight)));
+					self:visible(true)
+				end
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = GetBestScore()
+
+				if not score then
+					local score = (params.TotalPercent / 100 * (graphheight - 1)) + 1
+					if score >= 1 then
+						self:zoomtoheight(score);
+						self:visible(true);
+					end
+				end
+			end
+		},
+
+		Def.Quad { -- best score graph
+			Name = "BestScoreBar",
+			InitCommand = function(self)
+				self:x(bestcorebarx):y(graphy):zoomx(bestcorebarwidth):diffuse(colorbest):vertalign(bottom)
+					:visible(true)
+			end,
+			BeginCommand = function(self)
+				local score = GetBestScore()
+
+				if score then
+					local truescore = (score:GetWifeScore())
+					self:zoomtoheight((truescore * (graphheight)));
+					local light = getLight(self)
+					self:diffusetopedge(light, 1, light, 1)
+					self:visible(true)
+				end
+			end,
+			JudgmentMessageCommand = function(self, params)
+				local score = GetBestScore()
+
+				if not score then
+					local score = (params.TotalPercent / 100 * (graphheight - 1)) + 1
+					if score >= 1 then
+						self:zoomtoheight(score);
+						local light = getLight(self)
+						self:diffusetopedge(light, 1, light, 1)
+						self:visible(true);
+					end
+				end
+			end
+		},
+
+
+		-- text below
+
+
+
+		Def.Quad {
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 90):setsize(keyBoxWidth + 1, 17):diffuse(color("#000000"))
+					:visible(true)
+			end,
+		},
+
+		Def.Quad {
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 70):setsize(keyBoxWidth + 1, 17):diffuse(color("#000000"))
+					:visible(true)
+			end,
+		},
+
+		Def.Quad {
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 50):setsize(keyBoxWidth + 1, 17):diffuse(color("#000000"))
+					:visible(true)
+			end,
+		},
+
+		Def.Quad {
+			InitCommand = function(self)
+				local c = colorcurrent
+				local ctop = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("505050", 16), OR)))
+				local cbot = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("AAAAAA", 16), AND)))
+
+				self:x(keyTextPosX):y(graphy - 90):setsize(keyBoxWidth, 15)
+					:diffuse(c)
+					:diffusetopedge(ctop)
+					:diffusebottomedge(cbot)
+					:visible(true)
+			end,
+		},
+
+		Def.Quad {
+			InitCommand = function(self)
+				local c = colorbest
+				local ctop = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("505050", 16), OR)))
+				local cbot = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("AAAAAA", 16), AND)))
+
+				self:x(keyTextPosX):y(graphy - 70)
+				:setsize(keyBoxWidth, 15)
+				:diffuse(c)
+				:diffusetopedge(ctop)
+				:diffusebottomedge(cbot)
+				:visible(true)
+			end,
+		},
+
+		Def.Quad {
+			InitCommand = function(self)
+				local c = colortarget
+				local ctop = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("505050", 16), OR)))
+				local cbot = color(("#%06X"):format(bitwise(tonumber(ColorToHex(c), 16), tonumber("AAAAAA", 16), AND)))
+
+				self:x(keyTextPosX):y(graphy - 50)
+				:setsize(keyBoxWidth, 15)
+				:diffuse(c)
+				:diffusetopedge(ctop)
+				:diffusebottomedge(cbot)
+				:visible(true)
+			end,
+		},
+
+
+		LoadFont("Common Normal") .. {
+			Name = "TargetScore",
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 90):zoom(0.4):diffuse(color("#FFFFFF")):maxwidth(keyBoxTextMaxWidth):shadowlength(1):shadowcolor(color("#000000FF"))
+			end,
+			BeginCommand = function(self)
+				self:settext('Current Score')
+			end,
+		},
+
+		LoadFont("Common Normal") .. {
+			Name = "TargetScore",
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 70):zoom(0.4):diffuse(color("#FFFFFF")):maxwidth(keyBoxTextMaxWidth):shadowlength(1):shadowcolor(color("#000000FF"))
+			end,
+			BeginCommand = function(self)
+				self:settext('Loading...')
+
+				local score = GetBestScore()
+				if score then
+					self:settext('Best Score')
+				else
+					self:settext('First Score')
+				end
+			end,
+		},
+
+		LoadFont("Common Normal") .. { -- GraphType (Target)
+			InitCommand = function(self)
+				self:x(keyTextPosX):y(graphy - 50):zoom(0.4):diffuse(color("#FFFFFF")):maxwidth(keyBoxTextMaxWidth):shadowlength(1):shadowcolor(color("#000000FF"))
+			end,
+			BeginCommand = function(self)
+				if target == 1 then
+					self:settext('Rank AAA')
+				elseif target == gradetier["Tier03"] then
+					self:settext('Rank AA')
+				elseif target == gradetier["Tier04"] then
+					self:settext('Rank A')
+				elseif target == gradetier["Tier05"] then
+					self:settext('Rank B')
+				elseif target == gradetier["Tier06"] then
+					self:settext('Rank C')
+				else
+					self:settext('Wife ' .. tostring(target * 100) .. '%')
+				end;
+			end,
+		},
+	},
+};
+
+local PMdisplay = themeConfig:get_data().PMDisplay
+
+if PMdisplay == "1" then
+	return Def.ActorFrame {}
+else
+	return t
+end

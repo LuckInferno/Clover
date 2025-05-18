@@ -1,6 +1,6 @@
 if IsSMOnlineLoggedIn() then
     print("Forced user to log out because they are logged in")
-	CloseConnection()
+    CloseConnection()
 end
 
 local t = Def.ActorFrame {
@@ -11,16 +11,18 @@ local t = Def.ActorFrame {
             SCUFF.visitedCoreBundleSelect = true
             SCREENMAN:SetNewScreen("ScreenCoreBundleSelect")
         end
-    end,
+    end
 }
 
-t[#t+1] = LoadActor(THEME:GetPathG("Title", "BG"))
+t[#t + 1] = LoadActor(THEME:GetPathG("Title", "BG"))
 
 local gradientwidth = 1104 / 1920 * SCREEN_WIDTH
 local gradientheight = SCREEN_HEIGHT
 local separatorxpos = 814 / 1920 * SCREEN_WIDTH -- basically the top right edge of the gradient
-local separatorthickness = 22 / 1920 * SCREEN_WIDTH -- very slightly fudged due to measuring a diagonal line
-local separatorlength = math.sqrt(SCREEN_HEIGHT * SCREEN_HEIGHT + (gradientwidth - separatorxpos) * (gradientwidth - separatorxpos)) + 10 -- hypotenuse
+local separatorthickness = 12 / 1920 * SCREEN_WIDTH -- very slightly fudged due to measuring a diagonal line
+local separatorlength = math.sqrt(SCREEN_HEIGHT * SCREEN_HEIGHT +
+                                      (gradientwidth - separatorxpos) *
+                                      (gradientwidth - separatorxpos)) + 10 -- hypotenuse
 
 local logoFrameUpperGap = 39 / 1080 * SCREEN_HEIGHT -- from top edge to logo
 local logoFrameLeftGap = 61 / 1920 * SCREEN_WIDTH -- from left edge to logo
@@ -30,7 +32,8 @@ local logoThemeNameUpperGap = 67 / 1080 * SCREEN_HEIGHT -- from top of name text
 local logosourceHeight = 133
 local logosourceWidth = 102
 local logoratio = math.min(1920 / SCREEN_WIDTH, 1080 / SCREEN_HEIGHT)
-local logoH, logoW = getHWKeepAspectRatio(logosourceHeight, logosourceWidth, logosourceWidth / logosourceWidth)
+local logoH, logoW = getHWKeepAspectRatio(logosourceHeight, logosourceWidth,
+                                          logosourceWidth / logosourceWidth)
 
 local versionNumberLeftGap = 5 / 1920 * SCREEN_WIDTH
 local versionNumberUpperGap = 980 / 1080 * SCREEN_HEIGHT
@@ -39,7 +42,7 @@ local themeVersionUpperGap = 1015 / 1080 * SCREEN_HEIGHT
 local translations = {
     GameName = THEME:GetString("Common", "Etterna"):upper(),
     UpdateAvailable = THEME:GetString("ScreenTitleMenu", "UpdateAvailable"),
-    By = THEME:GetString("ScreenTitleMenu", "By"),
+    By = THEME:GetString("ScreenTitleMenu", "By")
 }
 
 local nameTextSize = 0.9
@@ -79,15 +82,15 @@ end
 
 local function clickDownload(self, params)
     if self:IsInvisible() then return end
-    if not params or params.event ~= "DeviceButton_left mouse button" then return end
+    if not params or params.event ~= "DeviceButton_left mouse button" then
+        return
+    end
     DLMAN:ShowProjectReleases()
 end
 
-t[#t+1] = Def.ActorFrame {
+t[#t + 1] = Def.ActorFrame {
     Name = "LeftSide",
-    InitCommand = function(self)
-        self:x(-SCREEN_WIDTH)
-    end,
+    InitCommand = function(self) self:x(-SCREEN_WIDTH) end,
     BeginCommand = function(self)
         self:smooth(animationSeconds)
         self:x(0)
@@ -120,7 +123,8 @@ t[#t+1] = Def.ActorFrame {
             self:diffuse(color("0,0,0,1"))
             self:fadeleft(1)
             self:faderight(1)
-            local ang = math.atan((gradientwidth - separatorxpos) / separatorlength)
+            local ang = math.atan((gradientwidth - separatorxpos) /
+                                      separatorlength)
             self:rotationz(-math.deg(ang))
         end
     },
@@ -130,7 +134,8 @@ t[#t+1] = Def.ActorFrame {
             self:halign(0):valign(0)
             self:zoomto(separatorthickness, separatorlength)
             self:x(separatorxpos)
-            local ang = math.atan((gradientwidth - separatorxpos) / separatorlength)
+            local ang = math.atan((gradientwidth - separatorxpos) /
+                                      separatorlength)
             self:rotationz(-math.deg(ang))
             self:diffuse(COLORS:getTitleColor("Separator"))
             self:diffusealpha(1)
@@ -142,7 +147,7 @@ t[#t+1] = Def.ActorFrame {
         InitCommand = function(self)
             self:xy(logoFrameLeftGap, logoFrameUpperGap)
         end,
-    
+
         Def.Sprite {
             Name = "LogoTriangle",
             Texture = THEME:GetPathG("", "Logo-Triangle"),
@@ -150,7 +155,7 @@ t[#t+1] = Def.ActorFrame {
                 self:halign(0):valign(0)
                 self:zoomto(logoW, logoH)
                 registerActorToColorConfigElement(self, "title", "LogoTriangle")
-            end,
+            end
         },
         UIElements.SpriteButton(100, 1, THEME:GetPathG("", "Logo-E")) .. {
             Name = "Logo",
@@ -160,7 +165,8 @@ t[#t+1] = Def.ActorFrame {
                 registerActorToColorConfigElement(self, "title", "LogoE")
             end,
             MouseOverCommand = function(self)
-                self:GetParent():GetChild("LogoTriangle"):diffusealpha(buttonHoverAlpha)
+                self:GetParent():GetChild("LogoTriangle"):diffusealpha(
+                    buttonHoverAlpha)
                 self:diffusealpha(buttonHoverAlpha)
             end,
             MouseOutCommand = function(self)
@@ -171,7 +177,10 @@ t[#t+1] = Def.ActorFrame {
                 if params.event == "DeviceButton_left mouse button" then
                     local function startSong()
                         local sngs = SONGMAN:GetAllSongs()
-                        if #sngs == 0 then ms.ok("No songs to play") return end
+                        if #sngs == 0 then
+                            ms.ok("No songs to play")
+                            return
+                        end
 
                         local s = sngs[math.random(#sngs)]
                         local p = s:GetMusicPath()
@@ -183,33 +192,32 @@ t[#t+1] = Def.ActorFrame {
 
                         SOUND:StopMusic()
                         SOUND:PlayMusicPart(p, 0, l)
-            
-                        ms.ok("NOW PLAYING: "..s:GetMainTitle() .. " | LENGTH: "..SecondsToMMSS(l))
-            
-                        top:setTimeout(
-                            function()
-                                if not playingMusic[thisSong] then return end
-                                playingMusicCounter = playingMusicCounter + 1
-                                startSong()
-                            end,
-                            l
-                        )
-            
-                    end
-            
-                    SCREENMAN:GetTopScreen():setTimeout(function()
-                            playingMusic[playingMusicCounter] = false
+
+                        ms.ok("NOW PLAYING: " .. s:GetMainTitle() ..
+                                  " | LENGTH: " .. SecondsToMMSS(l))
+
+                        top:setTimeout(function()
+                            if not playingMusic[thisSong] then
+                                return
+                            end
                             playingMusicCounter = playingMusicCounter + 1
                             startSong()
-                        end,
-                    0.1)
+                        end, l)
+
+                    end
+
+                    SCREENMAN:GetTopScreen():setTimeout(function()
+                        playingMusic[playingMusicCounter] = false
+                        playingMusicCounter = playingMusicCounter + 1
+                        startSong()
+                    end, 0.1)
                 else
                     SOUND:StopMusic()
                     playingMusic = {}
                     playingMusicCounter = playingMusicCounter + 1
                     ms.ok("Stopped music")
                 end
-            end,
+            end
         },
         LoadFont("Menu Bold") .. {
             Name = "GameName",
@@ -217,7 +225,8 @@ t[#t+1] = Def.ActorFrame {
                 self:halign(0):valign(0)
                 self:x(logoNameLeftGap + logoW)
                 self:zoom(nameTextSize)
-                self:maxwidth((separatorxpos - (logoNameLeftGap + logoW) - logoNameLeftGap) / nameTextSize)
+                self:maxwidth((separatorxpos - (logoNameLeftGap + logoW) -
+                                  logoNameLeftGap) / nameTextSize)
                 self:settext(translations["GameName"])
                 self:diffuse(COLORS:getTitleColor("PrimaryText"))
                 self:diffusealpha(1)
@@ -229,7 +238,8 @@ t[#t+1] = Def.ActorFrame {
                 self:halign(0):valign(0)
                 self:xy(logoThemeNameLeftGap + logoW, logoThemeNameUpperGap)
                 self:zoom(themenameTextSize)
-                self:maxwidth((separatorxpos - (logoNameLeftGap + logoW) - logoThemeNameLeftGap) / themenameTextSize)
+                self:maxwidth((separatorxpos - (logoNameLeftGap + logoW) -
+                                  logoThemeNameLeftGap) / themenameTextSize)
                 self:settext(getThemeName())
                 self:diffuse(COLORS:getTitleColor("PrimaryText"))
                 self:diffusealpha(1)
@@ -241,7 +251,7 @@ t[#t+1] = Def.ActorFrame {
                 self:halign(0):valign(0)
                 self:xy(versionNumberLeftGap, versionNumberUpperGap)
                 self:zoom(versionTextSize)
-                self:settext("V "..GAMESTATE:GetEtternaVersion())
+                self:settext("V " .. GAMESTATE:GetEtternaVersion())
                 self:diffuse(COLORS:getTitleColor("PrimaryText"))
                 self:diffusealpha(1)
             end
@@ -252,17 +262,19 @@ t[#t+1] = Def.ActorFrame {
                 self:halign(0):valign(0)
                 local vnc = self:GetParent():GetChild("VersionNumber")
                 local bufferspace = 5 / 1920 * SCREEN_WIDTH
-                self:xy(vnc:GetX() + vnc:GetZoomedWidth() + bufferspace, versionNumberUpperGap)
+                self:xy(vnc:GetX() + vnc:GetZoomedWidth() + bufferspace,
+                        versionNumberUpperGap)
                 self:zoom(versionTextSize)
-                self:maxwidth(((gradientwidth - vnc:GetX() - vnc:GetZoomedWidth() - logoFrameLeftGap - separatorthickness) / versionTextSize))
-                self:settextf("- %s (%s)", translations["UpdateAvailable"], DLMAN:GetLastVersion())
+                self:maxwidth(((gradientwidth - vnc:GetX() -
+                                  vnc:GetZoomedWidth() - logoFrameLeftGap -
+                                  separatorthickness) / versionTextSize))
+                self:settextf("- %s (%s)", translations["UpdateAvailable"],
+                              DLMAN:GetLastVersion())
                 self:diffuse(COLORS:getTitleColor("UpdateText"))
                 self:diffusealpha(1)
                 self:visible(false)
 
-                if updateRequired then
-                    self:visible(true)
-                end
+                if updateRequired then self:visible(true) end
             end,
             MouseOutCommand = hoverfunc,
             MouseOverCommand = hoverfunc,
@@ -270,55 +282,66 @@ t[#t+1] = Def.ActorFrame {
             LastVersionUpdatedMessageCommand = function(self)
                 setUpdateRequired()
                 self:visible(updateRequired)
-                self:settextf("- %s (%s)", translations["UpdateAvailable"], DLMAN:GetLastVersion())
-            end,
+                self:settextf("- %s (%s)", translations["UpdateAvailable"],
+                              DLMAN:GetLastVersion())
+            end
         },
-        UIElements.SpriteButton(100, 1, THEME:GetPathG("", "updatedownload")) .. {
-            Name = "VersionUpdateDownload",
-            OnCommand = function(self) -- happens third
-                self:halign(0):valign(0)
-                local vuc = self:GetParent():GetChild("VersionUpdate")
-                local bufferspace = 5 / 1920 * SCREEN_WIDTH
-                self:xy(vuc:GetX() + vuc:GetZoomedWidth() + bufferspace, versionNumberUpperGap)
-                self:zoomto(updateDownloadIconSize, updateDownloadIconSize)
-                self:diffuse(COLORS:getTitleColor("UpdateText"))
-                self:diffusealpha(1)
-                self:visible(false)
+        UIElements.SpriteButton(100, 1, THEME:GetPathG("", "updatedownload")) ..
+            {
+                Name = "VersionUpdateDownload",
+                OnCommand = function(self) -- happens third
+                    self:halign(0):valign(0)
+                    local vuc = self:GetParent():GetChild("VersionUpdate")
+                    local bufferspace = 5 / 1920 * SCREEN_WIDTH
+                    self:xy(vuc:GetX() + vuc:GetZoomedWidth() + bufferspace,
+                            versionNumberUpperGap)
+                    self:zoomto(updateDownloadIconSize, updateDownloadIconSize)
+                    self:diffuse(COLORS:getTitleColor("UpdateText"))
+                    self:diffusealpha(1)
+                    self:visible(false)
 
-                if updateRequired then
-                    self:visible(true)
-                end
-            end,
-            MouseOutCommand = hoverfunc,
-            MouseOverCommand = hoverfunc,
-            MouseDownCommand = clickDownload,
-        },
+                    if updateRequired then self:visible(true) end
+                end,
+                MouseOutCommand = hoverfunc,
+                MouseOverCommand = hoverfunc,
+                MouseDownCommand = clickDownload
+            },
 
         LoadFont("Menu Normal") .. {
             Name = "ThemeVersionAndCredits",
             InitCommand = function(self)
                 self:halign(0):valign(0)
                 self:xy(versionNumberLeftGap, themeVersionUpperGap)
-                self:maxwidth((gradientwidth - versionNumberLeftGap - logoFrameLeftGap - separatorthickness) / versionTextSizeSmall)
+                self:maxwidth((gradientwidth - versionNumberLeftGap -
+                                  logoFrameLeftGap - separatorthickness) /
+                                  versionTextSizeSmall)
                 self:zoom(versionTextSizeSmall)
-                self:settext("("..getThemeName().." v"..getThemeVersion().."@"..getThemeDate().." " .. translations["By"] .. " "..getThemeAuthor()..")")
+                self:settext(
+                    "(" .. getThemeName() .. " v" .. getThemeVersion() .. "@" ..
+                        getThemeDate() .. " " .. translations["By"] .. " " ..
+                        getThemeAuthor() .. ")")
                 self:diffuse(COLORS:getTitleColor("SecondaryText"))
                 self:diffusealpha(1)
+            end
+        },
+
+        Def.Sprite {
+            Texture = THEME:GetPathG("", "ffrcat"),
+            InitCommand = function(self)
+                self:xy(400, SCREEN_HEIGHT - 50):halign(0):valign(1):zoom(0.5);
             end
         }
     }
 }
 
-
-
-
 local scrollerX = 99 / 1920 * SCREEN_WIDTH
 local scrollerY = 440 / 1920 * SCREEN_HEIGHT
 local selectorHeight = 37 / 1080 * SCREEN_HEIGHT
 local selectorWidth = 574 / 1920 * SCREEN_WIDTH
-local choiceTable = strsplit(THEME:GetMetric("ScreenTitleMenu", "ChoiceNames"), ",")
+local choiceTable = strsplit(THEME:GetMetric("ScreenTitleMenu", "ChoiceNames"),
+                             ",")
 
-t[#t+1] = Def.ActorFrame {
+t[#t + 1] = Def.ActorFrame {
     Name = "SelectionFrame",
     BeginCommand = function(self)
         -- i love hacks.
@@ -337,7 +360,8 @@ t[#t+1] = Def.ActorFrame {
     end,
     MenuSelectionChangedMessageCommand = function(self)
         local i = self:GetFakeParent():GetDestinationItem() + 1
-        local actorScroller = self:GetFakeParent():GetChild("ScrollChoice"..choiceTable[i])
+        local actorScroller = self:GetFakeParent():GetChild("ScrollChoice" ..
+                                                                choiceTable[i])
 
         self:finishtweening()
         self:smooth(0.05)
@@ -356,15 +380,14 @@ t[#t+1] = Def.ActorFrame {
         UpdateWidthCommand = function(self)
             -- the minimum width is going to be about 10% longer than the longest choice text
             local widest = selectorWidth
-            for name, child in pairs(self:GetParent():GetFakeParent():GetChildren()) do
+            for name, child in pairs(self:GetParent():GetFakeParent()
+                                         :GetChildren()) do
                 local w = child:GetChild("ScrollerText"):GetZoomedWidth()
                 if w > widest - (selectorHeight * 2) then
                     widest = w + selectorHeight * 2
                 end
             end
-            if widest ~= selectorWidth then
-                widest = widest * 1.1
-            end
+            if widest ~= selectorWidth then widest = widest * 1.1 end
             self:zoomto(widest, selectorHeight)
         end
     },
@@ -380,5 +403,11 @@ t[#t+1] = Def.ActorFrame {
         end
     }
 }
+
+t[#t + 1] = LoadActor(THEME:GetPathS("Common", "Boom")) ..
+                {OnCommand = function(self) self:play() end}
+
+t[#t + 1] = LoadActor(THEME:GetPathS("", "menu_music")) ..
+                {OnCommand = function(self) self:play() end}
 
 return t

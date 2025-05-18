@@ -111,7 +111,7 @@ local t = Def.ActorFrame {
             self:diffuse(COLORS:getGameplayColor("ErrorBarCenter"))
         end,
         SetUpMovableValuesMessageCommand = function(self)
-            self:zoomto(2, MovableValues.ErrorBarHeight)
+            self:zoomto(2, MovableValues.ErrorBarHeight + 8)
         end,
     },
 
@@ -171,6 +171,18 @@ if errorbarType == "Regular" then
     for i = 1, barcount do
         t[#t+1] = smeltErrorBar(i)
     end
+
+    t[#t+1] = Def.Quad {
+        Name = "Center",
+        InitCommand = function(self)
+            self:diffuse(COLORS:getGameplayColor("ErrorBarCenter"))
+        end,
+        SetUpMovableValuesMessageCommand = function(self)
+            self:zoomto(2, MovableValues.ErrorBarHeight + 8)
+        end,
+    }
 end
+
+
 
 return t

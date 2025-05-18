@@ -66,12 +66,12 @@ local ratios = {
     ConnectionLogoBottomGap = 0 / 1080, -- same as above
     ConnectionLogoSize = 36 / 1080, -- this is 36x36
     LeftTextLeftGap = 8 / 1920, -- this is after the avatar
-    LeftTextTopGap1 = 24 / 1080, -- from top to center of line 1
-    LeftTextTopGap2 = 49 / 1080, -- from top to center of line 2
-    LeftTextTopGap3 = 72 / 1080, -- from top to center of line 3
-    LeftTextTopGap4 = 95 / 1080, -- from top to center of line 4
+    LeftTextTopGap1 = 20 / 1080, -- from top to center of line 1
+    LeftTextTopGap2 = 42 / 1080, -- from top to center of line 2
+    LeftTextTopGap3 = 66 / 1080, -- from top to center of line 3
+    LeftTextTopGap4 = 89 / 1080, -- from top to center of line 4
     RightTextLeftGap = 412 / 1920, -- this is from avatar to right text
-    RightTextTopGap1 = 21 / 1080, -- why did this have to be different from Left line 1
+    RightTextTopGap1 = 20 / 1080, -- why did this have to be different from Left line 1
     RightTextTopGap2 = 54 / 1080, -- from top to center of line 2
     RightTextTopGap3 = 89 / 1080, -- from top to center of line 3
     VisualizerLeftGap = 707 / 1920, -- from left side of screen to leftmost bin
@@ -324,7 +324,7 @@ t[#t+1] = Def.Quad {
     InitCommand = function(self)
         self:halign(0):valign(0)
         self:zoomto(actuals.Width, actuals.Height)
-        self:diffusealpha(0.8)
+        self:diffusealpha(0.6)
         registerActorToColorConfigElement(self, "main", "PrimaryBackground")
     end
 }

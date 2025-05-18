@@ -1,0 +1,229 @@
+local t = Def.ActorFrame {
+    InitCommand = function (self)
+        self:z(1)        
+    end
+}
+
+-- local cols = GAMESTATE:GetCurrentStyle():ColumnsPerPlayer()
+-- local evencols = cols - cols%2
+-- local isCentered = ((cols >= 6) or PREFSMAN:GetPreference("Center1Player")) and GAMESTATE:GetNumPlayersEnabled() == 1
+-- local nfspace = MovableValues.NotefieldSpacing and MovableValues.NotefieldSpacing or 0
+-- local width = 64 * cols * MovableValues.NotefieldWidth + nfspace * (evencols)
+-- local padding = 8
+-- local styleType = ToEnumShortString(GAMESTATE:GetCurrentStyle():GetStyleType())
+
+-- local P1X =
+-- 	SCREEN_CENTER_X + MovableValues.NotefieldX + (cols % 2 == 0 and -nfspace / 2 or 0)
+
+-- if not isCentered then
+-- 	P1X = THEME:GetMetric("ScreenGameplay", string.format("PlayerP1%sX", styleType)) + MovableValues.NotefieldX + (cols % 2 == 0 and -nfspace / 2 or 0)
+-- end
+
+local P1X = SCREEN_CENTER_X
+
+-- local ratio = (((SCREEN_WIDTH/2) - 141) / 338)
+
+local playerWidth = 360
+local playerHeight = 240
+
+local posx = SCREEN_WIDTH - (playerWidth / 2) - 30
+local posy = SCREEN_CENTER_Y
+
+local left = posx - (playerWidth / 2)
+local right = posx + (playerWidth / 2)
+local top = posy - (playerHeight / 2)
+local bottom = posy + (playerHeight / 2)
+
+local pbWidth = playerWidth
+local pbHeight = 10
+local pbx = posx
+local pby = bottom  + pbHeight / 2
+
+local song = GAMESTATE:GetCurrentSong()
+
+local enabled = PREFSMAN:GetPreference("ShowBackgrounds")
+local brightness = 0
+
+--Group folder name
+local frameWidth = playerWidth
+local frameHeight = 20
+local frameX = posx + (0.5 * frameWidth)
+local frameY = 10
+
+t[#t+1] = Def.ActorFrame{
+	InitCommand = function(self)
+		self:xy(frameX,frameY)
+	end,
+	OnCommand = function(self)
+		self:y(-frameHeight/2)
+		self:smooth(0.5)
+		self:y(frameY)
+		SCREENMAN:GetTopScreen():AddInputCallback(MPinput)
+	end,
+	OffCommand = function(self)
+		self:smooth(0.5)
+		self:y(-frameHeight/2)
+	end,
+	Def.Quad{
+		InitCommand=function(self)
+			self:halign(1):zoomto(frameWidth,frameHeight):diffuse(getMainColor('highlight')):diffusealpha(0.8)
+		end
+	},
+	LoadFont("Common Normal") .. {
+		InitCommand=function(self)
+			self:x(-frameWidth+5):halign(0):zoom(0.45):maxwidth((frameWidth-10)/0.45)
+		end,
+		BeginCommand=function(self)
+			self:diffuse(color(colorConfig:get_data().main.headerFrameText))
+			local song = GAMESTATE:GetCurrentSong()
+			if song ~= nil then
+				self:settext(song:GetGroupName())
+			end
+		end
+	}
+}
+
+t[#t + 1] = Def.Sprite {
+    Name = "BGSprite",
+    InitCommand = function(self)
+        self:diffusealpha(0):xy(posx,posy)
+    end,
+    CurrentSongChangedMessageCommand = function(self)
+        self:stoptweening():diffusealpha(0)
+        self:sleep(0.2):queuecommand("ModifySongBackground")
+    end,
+    ModifySongBackgroundCommand = function(self)
+        if song and song:GetBackgroundPath() then
+            self:finishtweening()
+            self:visible(true)
+
+            -- self:LoadBackground(GAMESTATE:Get)
+            self:LoadBackground(song:GetBackgroundPath())
+            
+            -- self:scaletofit(left, top, right, bottom)
+            self:scaletocover(left, top, right, bottom)
+
+            -- self:scaletoclipped(right-left, bottom-top)
+
+            self:sleep(0.05)
+            self:smooth(0.4):diffusealpha(brightness)
+        else
+            self:visible(false)
+        end
+    end,
+    OffCommand = function(self)
+        self:smooth(0.6):diffusealpha(0)
+    end,
+}
+
+t[#t + 1] = Def.ActorFrame {
+    Name = "ProgressBar",
+    InitCommand = function(self)
+        self:xy(pbx, pby)
+        self:setsize(pbWidth, pbHeight)
+    end,
+    Def.Quad {
+        InitCommand = function(self)
+            self:setsize(pbWidth, pbHeight):diffuse(color("#333333"))
+        end
+    },
+    Def.SongMeterDisplay {
+        InitCommand = function(self)
+            self:SetUpdateRate(0.5)
+        end,
+        StreamWidth = pbWidth,
+        Stream = Def.Quad {
+            InitCommand = function(self)
+                self:zoomy(pbHeight):diffuse(color("#990000"))
+                self:diffusebottomedge(color("#330000"))
+            end
+        }
+    },
+    LoadFont("Common Normal") .. {
+        -- current time
+        InitCommand = function(self)
+            self:x(pbWidth / 2):zoom(0.35):maxwidth(pbWidth * 2):halign(1)
+        end,
+        BeginCommand = function(self)
+            local ttime = GetPlayableTime()
+            self:settext(SecondsToMSS(ttime))
+            self:diffuse(byMusicLength(ttime))
+        end,
+        DoneLoadingNextSongMessageCommand = function(self)
+            local ttime = GetPlayableTime()
+            self:settext(SecondsToMSS(ttime))
+            self:diffuse(byMusicLength(ttime))
+        end,
+        --- ???? uhhh
+        CurrentRateChangedMessageCommand = function(self)
+            local ttime = GetPlayableTime()
+            self:settext(SecondsToMSS(ttime))
+            self:diffuse(byMusicLength(ttime))
+        end,
+        PracticeModeReloadMessageCommand = function(self)
+            self:playcommand("CurrentRateChanged")
+        end
+    },
+}
+
+local subtitle = GAMESTATE:GetCurrentSong():GetDisplaySubTitle()
+local rate = GAMESTATE:GetSongOptionsObject("ModsLevel_Current"):MusicRate()
+local author = GAMESTATE:GetCurrentSong():GetOrTryAtLeastToGetSimfileAuthor()
+local artist = GAMESTATE:GetCurrentSong():GetDisplayArtist()
+local title = GAMESTATE:GetCurrentSong():GetDisplayMainTitle()
+local mods = GAMESTATE:GetPlayerState():GetPlayerOptionsString("ModsLevel_Current")
+
+t[#t + 1] = LoadFont("Common Normal") .. {
+    -- title
+    InitCommand = function(self)
+        self:xy(posx, pby):zoom(0.35):maxwidth(playerWidth * 2)
+    end,
+    BeginCommand = function(self)
+        self:settextf("%s - %s", artist, title)
+    end,
+    DoneLoadingNextSongMessageCommand = function(self)
+        self:settextf("%s - %s", artist, title)
+    end,
+}
+
+t[#t + 1] = LoadFont("Common Normal") .. {
+    -- Mods
+    InitCommand = function(self)
+        self:xy(posx, bottom + 21):zoom(0.45):maxwidth(playerWidth * 2)
+    end,
+    BeginCommand = function(self)
+        self:settext(mods)
+    end,
+    DoneLoadingNextSongMessageCommand = function(self)
+        self:settext(mods)
+    end,
+}
+
+t[#t + 1] = LoadFont("Common Normal") .. {
+    -- Subtitle + Credit
+    InitCommand = function(self)
+        self:xy(posx, bottom + 51):zoom(0.45):maxwidth(playerWidth * 2)
+    end,
+    BeginCommand = function(self)
+        self:settextf("\"%s\" -%s", subtitle, author)
+    end,
+    DoneLoadingNextSongMessageCommand = function(self)
+        self:settextf("\"%s\" -%s", subtitle, author)
+    end,
+}
+
+t[#t + 1] = LoadFont("Common Normal") .. {
+    -- Rate
+    InitCommand = function(self)
+        self:xy(posx, bottom + 36):zoom(0.45):maxwidth(playerWidth * 2)
+    end,
+    BeginCommand = function(self)
+        self:settextf("%5.2fxMusic", rate)
+    end,
+    DoneLoadingNextSongMessageCommand = function(self)
+        self:settextf("%5.2fxMusic", rate)
+    end,
+}
+
+
+return t

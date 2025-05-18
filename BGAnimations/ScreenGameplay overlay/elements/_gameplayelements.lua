@@ -176,4 +176,10 @@ if playerConfig:get_data().TargetTracker then
     t[#t+1] = LoadActor("targettracker")
 end
 
+t[#t+1] = LoadActor("streamdisplay")
+-- t[#t+1] = LoadActor("scrollbar")
+t[#t+1] = LoadActor("bga")
+t[#t+1] = LoadActor("pacemaker")
+-- t[#t+1] = LoadActor("songinfo")
+
 return t

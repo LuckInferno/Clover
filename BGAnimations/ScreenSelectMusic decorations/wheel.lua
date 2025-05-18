@@ -715,7 +715,7 @@ local function songActorBuilder()
         },
         Def.Sprite {
             Name = "FavoriteIcon",
-            Texture = THEME:GetPathG("", "round_star"),
+            Texture = THEME:GetPathG("", "round_heart"),
             InitCommand = function(self)
                 -- same y line as the artist text
                 self:y(actuals.ItemHeight / 2 - actuals.ItemTextLowerGap)

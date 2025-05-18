@@ -21,7 +21,7 @@ local function loadbg(self)
     self.loadedpath = self.bgpath
     self:scale_or_crop_background()
     self:smooth(0.5)
-    self:diffusealpha(0.3)
+    self:diffusealpha(0.5)
 end
 
 -- reset context manager as early as possible in the selectmusic init process

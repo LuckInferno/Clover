@@ -73,7 +73,7 @@ local function makeJudgment(i)
             InitCommand = function(self)
                 self:halign(0):valign(0)
                 self:zoomto(sizing.JudgmentBarLength, sizing.JudgmentBarHeight)
-                self:diffusealpha(0.5)
+                self:diffusealpha(0.4)
                 registerActorToColorConfigElement(self, "judgment", jdg)
             end
         },

@@ -27,4 +27,9 @@ else
 	songoptions:RandomBGOnly(false)
 end
 
-return Def.ActorFrame {}
+local t = Def.ActorFrame {}
+
+t[#t+1] = LoadActor("GameplayFooter")
+t[#t+1] = LoadActor("GameplayHeader")
+
+return t
