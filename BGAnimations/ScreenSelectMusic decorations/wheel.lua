@@ -3,14 +3,14 @@
  -- but thankfully everything works fine if you change it
  -- ... the header wont look very good if you push it off the screen though
  -- (retrospective comment: wtf i changed this to 14 and it still works)
-local numWheelItems = 14
+local numWheelItems = 15
 
 local ratios = {
     LeftGap = 16 / 1920,
-    UpperGap = 219 / 1080, -- distance from top of screen, not info frame
+    UpperGap = 109 / 1080, -- distance from top of screen, not info frame
     LowerGap = 0 / 1080, -- expected, maybe unused
     Width = 867 / 1920,
-    Height = 861 / 1080, -- does not include the header
+    Height = (1080 - 109) / 1080, -- does not include the header
     ItemHeight = 86.5 / 1080, -- 85 + 2 to account for half of the upper and lower item dividers
     ItemDividerThickness = 2 / 1080,
     ItemDividerLength = 584 / 1920,
@@ -25,9 +25,9 @@ local ratios = {
     ItemPermamirrorIconSize = 39 / 1080, -- width and height of the icon
     BannerWidth = 265 / 1920,
     BannerItemGap = 18 / 1920, -- gap between banner and item text/dividers
-    HeaderHeight = 110 / 1080,
-    HeaderUpperGap = 109 / 1080, -- top of screen to top of frame (same as playerinfo height)
-    wtffudge = 45 / 1080, -- this random number fixes the weird offset of the wheel vertically so that it fits perfectly with the header
+    HeaderHeight = 109 / 1080,
+    HeaderUpperGap = 0 / 1080, -- top of screen to top of frame (same as playerinfo height)
+    wtffudge = 77 / 1080, -- this random number fixes the weird offset of the wheel vertically so that it fits perfectly with the header
     -- effective measurements for group specific information
     HeaderBannerWidth = 336 / 1920,
     HeaderText1UpperGap = 21 / 1080, -- distance from top edge to top text top edge
@@ -45,7 +45,7 @@ local ratios = {
     GeneralBoxLeftGap = 1140 / 1920, -- distance from left edge to the left edge of the general box
 
     ScrollBarWidth = 18 / 1920,
-    ScrollBarHeight = 971 / 1080,
+    ScrollBarHeight = 1080 / 1080,
 }
 
 local actuals = {
@@ -1343,7 +1343,8 @@ t[#t+1] = Def.ActorFrame {
             self:playcommand("SetWPosition")
             -- places the frame at the top of the wheel
             -- positions will be relative to that
-            self:y(-actuals.ItemHeight * numWheelItems / 2 + actuals.ItemHeight * 1.242)
+            -- self:y(-actuals.ItemHeight * numWheelItems / 2 + actuals.ItemHeight * 1.242)
+            self:y(-SCREEN_HEIGHT/2 - actuals.ItemHeight/2)
         end,
         SetWPositionCommand = function(self)
             if getWheelPosition() then

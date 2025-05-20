@@ -56,11 +56,12 @@ local t = Def.ActorFrame {
 }
 
 local visEnabled = Var("visualizer")
+local visEnabled = false
 local loadingScreenName = Var("screen")
-
+local rightGap = 867 + 18
 local ratios = {
     Height = 109 / 1080, -- frame height
-    Width = 1, -- full screen width
+    Width = (1920-rightGap)/1920, -- full screen width
     AvatarWidth = 109 / 1080, -- this should end up square
     ConnectionLogoRightGap = 0 / 1080, -- logo position relative to the right edge of avatar (height based for square)
     ConnectionLogoBottomGap = 0 / 1080, -- same as above
@@ -75,7 +76,7 @@ local ratios = {
     RightTextTopGap2 = 54 / 1080, -- from top to center of line 2
     RightTextTopGap3 = 89 / 1080, -- from top to center of line 3
     VisualizerLeftGap = 707 / 1920, -- from left side of screen to leftmost bin
-    VisualizerWidth = 693 / 1920,
+    VisualizerWidth = 300 / 1920,
 
     RatingEdgeToVisualizerBuffer = 32 / 1920,
     RatingSideBuffer = 25 / 1920, -- an area of buffer to the left and right of the player rating text
@@ -83,26 +84,26 @@ local ratios = {
     IconUpperGap = 36 / 1080,
     IconExitWidth = 47 / 1920,
     IconExitHeight = 36 / 1080,
-    IconExitRightGap = 38 / 1920, -- from right side of screen to right end of icon
+    IconExitRightGap = (38 + rightGap) / 1920, -- from right side of screen to right end of icon
     IconSettingsWidth = 44 / 1920,
     IconSettingsHeight = 35 / 1080,
-    IconSettingsRightGap = 123 / 1920,
+    IconSettingsRightGap = (123 + rightGap) / 1920,
     IconHelpWidth = 36 / 1920,
     IconHelpHeight = 36 / 1080,
-    IconHelpRightGap = 205 / 1920,
+    IconHelpRightGap = (205 + rightGap)/ 1920,
     IconDownloadsWidth = 51 / 1920,
     IconDownloadsHeight = 36 / 1080,
-    IconDownloadsRightGap = 278 / 1920,
+    IconDownloadsRightGap = (278 + rightGap) / 1920,
     IconDownloadsProgressBar1UpperGap = 51 / 1080, -- top of icon to top of bar
     IconDownloadsProgressBar2UpperGap = 62.5 / 1080,
     IconDownloadsProgressBarHeight = 9 / 1080,
     IconDownloadsProgressBarWidth = 88 / 1920,
     IconRandomWidth = 41 / 1920,
     IconRandomHeight = 36 / 1080,
-    IconRandomRightGap = 367 / 1920,
+    IconRandomRightGap = (367 + rightGap) / 1920,
     IconSearchWidth = 36 / 1920,
     IconSearchHeight = 36 / 1080,
-    IconSearchRightGap = 446 / 1920,
+    IconSearchRightGap = (446 + rightGap) / 1920,
 }
 
 local actuals = {
